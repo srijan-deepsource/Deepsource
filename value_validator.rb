@@ -1,4 +1,6 @@
-require_relative "stack.rb"                                                           # => true
+require_relative "hash_validator.rb"
+require_relative "array_validator.rb"
+require_relative "string_validator.rb"                                                   # => true
 class ValueValidator
   VALIDATOR_CLASS_RULE = {
   	"\"" => "StringValidator",                                                         # => "StringValidator"

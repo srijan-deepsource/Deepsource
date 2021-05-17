@@ -1,7 +1,7 @@
-
 require_relative "stack.rb"              # => true
 require_relative "comment_validator.rb"  # => true
 require_relative "key_value_validator.rb"
+
 class HashValidator
   HASH_NEXT_RULE = {
   	"\"" => [",", "{"],                   # => [",", "{"]
