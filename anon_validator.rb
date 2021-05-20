@@ -1,60 +1,54 @@
+require_relative "comment_validator.rb"        # => true
+require_relative "key_value_validator.rb"      # => true
+require_relative "stack.rb"                    # => true
+require_relative "value_validator.rb"          # => true
 require_relative "hash_validator.rb"           # => true
+require_relative "array_validator.rb"          # => true
+require_relative "string_validator.rb"         # => true
+require_relative "boolean_validator.rb"        # => true
+require_relative "number_validator.rb"         # => true
 require_relative "char_matrix.rb"              # => true
-require_relative "constants.rb"                # => true
+require_relative "unexpected_token_error.rb"   # => true
+require "byebug"                               # => true
 class AnonValidator
+  SKIP = [" ", "\n", "\t", "\s"]               # => [" ", "\n", "\t", " "]
   attr_accessor :char_matrix                   # => nil
   def initialize
-    @char_matrix = CharMatrix.new.char_matrix  # => [["{", "\n"], ["/", "/", " ", "I", "'", "m", " ", "i", "g", "n", "o", "r", "e", "d", "\n"], ["\"", "K", "E", "Y", "\"", ":", " ", "\"", "V", "A", "L", "U", "E", "\"", "\n"], ["}"]]
+    @char_matrix = CharMatrix.new.char_matrix  # => [["{", "\n"], ["\"", "h", "e", "r", "o", "e", "s", "\"", ":", " ", "[", "\n"], ["{", "\n"], ["\"", "r", "e", "a", "l", "_", "n", "a", "m", "e", "\"", ":", " ", "\"", "C", "l", "i", "n", "t", " ", "B", "a", "r", "t", "o", "n", "\"", ",", "\n"], ["\"", "s", "u", "p", "e", "r", "h", "e", "r", "o", "_", "n", "a", "m", "e", "\"", ":", " ", "\"", "H", "a", "w", "k", "e", "y", "e", "\"", ",", "\n"], ["}", ",", "\n"], ["{", "\n"], ["/", "/", " ", "D...
   end                                          # => :initialize
 
   def valid
-    for i in 0..(char_matrix.size-1)                                                                                 # => 0..3
-        for j in 0..(char_matrix[i].size-1)                                                                          # => 0..1
-            char = char_matrix[i][j]                                                                                 # => "{"
-            next if Constants::SKIP_CHARS.include?(char)                                                             # => false
-            char                                                                                                     # => "{"
-            if char == "{"                                                                                           # => true
-                next_i, next_j = Object.const_get(Constants::VALIDATOR_CLASS_RULE[char]).new(i,j,char_matrix).valid  # ~> ArgumentError: comparison of Integer with nil failed
-                validate_anon_ending(next_i, next_j)
+    for i in 0..(char_matrix.size-1)                                          # => 0..17
+        for j in 0..(char_matrix[i].size-1)                                   # => 0..1
+            char = char_matrix[i][j]                                          # => "{"
+            next if SKIP.include?(char)                                       # => false
+            if char == "{"                                                    # => true
+                if HashValidator.new(i,j,char_matrix,"main").valid            # => true
+                  puts "You have given a valid ANON"                          # => nil
+                  return
+                end  
             else
-              raise "Error at line #{i}: ANON should start with {"
+              raise UnexpectedTokenError.new(i,j,"ANON should start with {")
             end
         end
     end
 
-  rescue 
-  end                                                                                                                # => :valid
-
-  def validate_anon_ending(next_i, next_j)
-    last_line = char_matrix.size-1
-    if next_i == last_line && next_j == char_matrix[last_line].size-1
-        puts "You have given a valid ANON"
-    else
-      raise "Error at line #{next_i}: ANON should end with }"
-    end    
-  end                                                                  # => :validate_anon_ending
-end                                                                    # => :validate_anon_ending
-
-
+  rescue UnexpectedTokenError => e
+    puts "Invalid ANON: Error in line #{e.i+1} with message: #{e.message}"
+    line = ""
+    for j in 0..e.j
+      line += char_matrix[e.i][j]
+    end
+    puts line + "<--"
+  rescue StandardError => e
+    puts "Code is broken somewhere..Let's fix it"
+    puts e.backtrace
+  end                                                                       # => :valid
+end                                                                         # => :valid
 
 
-AnonValidator.new.valid
 
-# >> [["{", "\n"], ["/", "/", " ", "I", "'", "m", " ", "i", "g", "n", "o", "r", "e", "d", "\n"], ["\"", "K", "E", "Y", "\"", ":", " ", "\"", "V", "A", "L", "U", "E", "\"", "\n"], ["}"]]
-# >> [["{", "\n"], ["/", "/", " ", "I", "'", "m", " ", "i", "g", "n", "o", "r", "e", "d", "\n"], ["\"", "K", "E", "Y", "\"", ":", " ", "\"", "V", "A", "L", "U", "E", "\"", "\n"], ["}"]]
 
-# ~> ArgumentError
-# ~> comparison of Integer with nil failed
-# ~>
-# ~> /Users/rajeevvishnu/Desktop/Deepsource/hash_validator.rb:42:in `<'
-# ~> /Users/rajeevvishnu/Desktop/Deepsource/hash_validator.rb:42:in `block (2 levels) in valid'
-# ~> /Users/rajeevvishnu/Desktop/Deepsource/hash_validator.rb:38:in `each'
-# ~> /Users/rajeevvishnu/Desktop/Deepsource/hash_validator.rb:38:in `block in valid'
-# ~> /Users/rajeevvishnu/Desktop/Deepsource/hash_validator.rb:34:in `each'
-# ~> /Users/rajeevvishnu/Desktop/Deepsource/hash_validator.rb:34:in `valid'
-# ~> /Users/rajeevvishnu/Desktop/Deepsource/anon_validator.rb:17:in `block (2 levels) in valid'
-# ~> /Users/rajeevvishnu/Desktop/Deepsource/anon_validator.rb:12:in `each'
-# ~> /Users/rajeevvishnu/Desktop/Deepsource/anon_validator.rb:12:in `block in valid'
-# ~> /Users/rajeevvishnu/Desktop/Deepsource/anon_validator.rb:11:in `each'
-# ~> /Users/rajeevvishnu/Desktop/Deepsource/anon_validator.rb:11:in `valid'
-# ~> /Users/rajeevvishnu/Desktop/Deepsource/anon_validator.rb:39:in `<main>'
+AnonValidator.new.valid  # => nil
+
+# >> You have given a valid ANON

@@ -1,5 +1,3 @@
-require_relative "char_matrix.rb"
-require "byebug"
 class NumberValidator
   NUMBER_ENDING = [",", "]", "}"]
   attr_accessor :i, :j, :char_matrix
@@ -17,7 +15,7 @@ class NumberValidator
           if validate_number(num)
             return i,column
           else
-            raise "Error at line #{i}: Number is invalid"
+            raise UnexpectedTokenError.new(i,column-1,"Number is invalid")
           end  
         else
           num += char
@@ -26,7 +24,7 @@ class NumberValidator
       if validate_number(num)
         return next_char(i,column)
       end
-        raise "Error at line #{i}: Number is invalid"
+        raise UnexpectedTokenError.new(i,column,"Number is invalid")
       else 
     end
 
@@ -43,7 +41,7 @@ class NumberValidator
       elsif char_matrix[i+1] && char_matrix[i+1][0]
           return i+1, 0
       else
-        raise "Error at line #{i}: ANON cannot end with a number"
+        raise UnexpectedTokenError.new(i,column,"ANON cannot end with a number")
       end
     end
  end

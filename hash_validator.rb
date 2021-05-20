@@ -1,8 +1,3 @@
-require_relative "stack.rb"
-require_relative "comment_validator.rb"
-require_relative "key_value_validator.rb"
-require_relative "char_matrix.rb"
-require "byebug"
 class HashValidator
   HASH_NEXT_RULE = {
   	"\"" => [",", "{"],
@@ -19,12 +14,13 @@ class HashValidator
   }
 
   SKIP = [" ", "\n", "\t", "\s"]
-  attr_accessor :i, :j, :char_matrix, :stack
-  def initialize(i,j,char_matrix)
+  attr_accessor :i, :j, :char_matrix, :stack, :type
+  def initialize(i,j,char_matrix, type = "other")
   	@i = i
   	@j = j
   	@char_matrix = char_matrix
   	@stack = Stack.new
+  	@type = type
   end
 
   def valid
@@ -49,24 +45,12 @@ class HashValidator
 	    	
 	    	next if SKIP.include?(char)
 	    
-	    	if char == "{"
-	    		raise "Error at line #{row}: Hash cannot have two {" unless stack.empty?
+	    	if stack.empty? && char == "{"
 	    		stack.push(char)
 	    	else
 	    		last_entry = stack.peek
-	    		
-	    		puts row,column
-	    		HASH_NEXT_RULE[char]&.include?(last_entry)
-				raise "Error at line #{row}: Unexpected token here" unless HASH_NEXT_RULE[char]&.include?(last_entry)
-				if char == "}"
-					if char_matrix[row][column+1]
-						return row, column+1
-					elsif char_matrix[row+1] && char_matrix[row+1][0]
-						return row+1, 0
-					else
-						return row, column
-					end
-				end
+				raise UnexpectedTokenError.new(row,column,"Unexpected token here") unless HASH_NEXT_RULE[char]&.include?(last_entry)
+				return next_char(row,column) if char == "}"
 				stack.push(char) if HASH_PUSH_RULE.include?(char)
 				if VALIDATOR_CLASS_RULE[char]
 				 next_row, next_column = Object.const_get(VALIDATOR_CLASS_RULE[char]).new(row, column, char_matrix).valid
@@ -75,6 +59,17 @@ class HashValidator
 			end
 	    end
 	 end
-	 raise "Error at line #{char_matrix.size-1}: Hash must end with }"
+	 raise UnexpectedTokenError.new(row,column,"Hash must end with }")
 	end
+
+	def next_char(i,column)
+	  return true if type == "main"
+      if char_matrix[i][column+1]
+          return i, column+1
+      elsif char_matrix[i+1] && char_matrix[i+1][0]
+        return i+1, 0
+      else
+        raise UnexpectedTokenError.new(i,column,"Invalid end to a ANON")
+      end
+    end
  end
