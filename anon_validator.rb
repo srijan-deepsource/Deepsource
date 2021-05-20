@@ -18,19 +18,19 @@ class AnonValidator
   end                                          # => :initialize
 
   def valid
-    for i in 0..(char_matrix.size-1)                                          # => 0..17
-        for j in 0..(char_matrix[i].size-1)                                   # => 0..1
-            char = char_matrix[i][j]                                          # => "{"
-            next if SKIP.include?(char)                                       # => false
-            if char == "{"                                                    # => true
-                if HashValidator.new(i,j,char_matrix,"main").valid            # => true
-                  puts "You have given a valid ANON"                          # => nil
-                  return
-                end  
+    for i in 0..(char_matrix.size-1)                                            # => 0..17
+      for j in 0..(char_matrix[i].size-1)                                     # => 0..1
+          char = char_matrix[i][j]                                            # => "{"
+          next if SKIP.include?(char)                                         # => false
+          if char == "{"                                                      # => true
+            if HashValidator.new(i,j,char_matrix,"main").valid                # => true
+              puts "You have given a valid ANON"                              # => nil
+              return
             else
               raise UnexpectedTokenError.new(i,j,"ANON should start with {")
             end
-        end
+          end
+        end  
     end
 
   rescue UnexpectedTokenError => e

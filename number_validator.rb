@@ -23,9 +23,9 @@ class NumberValidator
       end
       if validate_number(num)
         return next_char(i,column)
-      end
+      else
         raise UnexpectedTokenError.new(i,column,"Number is invalid")
-      else 
+      end 
     end
 
     def validate_number(num)
