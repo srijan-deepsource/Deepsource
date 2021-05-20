@@ -1,6 +1,6 @@
 Instructions:
 1) Paste your ANON in anon.txt
-2) Run validator.rb
+2) Run anon_validator.rb
 
 Validation Logic Used:
 1) Followed the methodology used in https://www.json.org/json-en.html for a json object.
